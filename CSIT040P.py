@@ -4,6 +4,13 @@ from datetime import datetime, date
 
 pri_order = {"High": 1, "Medium": 2, "Low": 3}
 
+def clear_terminal() -> None:
+    if (os.name == "nt"):
+        os.system("cls")
+    else:
+        os.system("clear")
+clear_terminal()
+
 def save_tasks(tasks):
     with open("sample.csv", "w", newline="") as file:
       writer = csv.DictWriter(file, fieldnames=["name", "course", "deadline", "priority", "completed"])
@@ -17,42 +24,89 @@ if os.path.exists("sample.csv"):
             row["completed"] = (row["completed"] == "True")
             tasks.append(row)
 
-
-for task in tasks:
-    print(task["name"], "-", task["course"], "- due", task["deadline"])
-
+#for task in tasks:
+#    print(task["name"], "-", task["course"], "- due", task["deadline"])
 
 def add_task(tasks):
-   name = input("Task name: ")
-   course = input("Course name: ")
-   while True:
-      deadline = input("Deadline (YYYY-MM-DD)")
-      try:
-         datetime.strptime(deadline, "%Y-%m-%d")
-         break
-      except ValueError:
-         print("Incorrect format, try again! (YYYY-MM-DD)")
-   while True:
-      priority = input("Priority (High-Medium-Low): ").capitalize()
-      if priority not in pri_order:
-         print("Enter a valid priority order (High-Medium-Low): ")
-      else:
-         break
-   task = {
-       "name": name,
-       "course": course,
-       "deadline": deadline,
-       "priority": priority,
-       "completed": False
-    }  
-   tasks.append(task)
-   save_tasks(tasks)
-   print("Task added!")
-
+   clear_terminal()
+   name = ""
+   course = ""
+   deadline = ""
+   priority = ""
+   while (True):
+      all_fields_added = True
+      choice = input(
+            "Select action:\n"+
+            "1: Enter task name\n"+
+            "2: Enter course name\n"+
+            "3: Enter Deadline date\n"+
+            "4: Enter priority level\n"+
+            "5: Cancel adding task and exit\n"+
+            "6: Save task and exit\n"+
+            "Action: ")
+      match choice:
+         case "1":
+            name = input("Task name: ")
+            clear_terminal()
+         case "2":
+            course = input("Course name: ")
+            clear_terminal()
+         case "3":
+            while True:
+               deadline = input("Deadline (YYYY-MM-DD): ")
+               try:
+                  datetime.strptime(deadline, "%Y-%m-%d")
+                  break
+               except ValueError:
+                  print("Incorrect format, try again!")
+            clear_terminal()
+         case "4":
+            while True:
+               priority = input("Priority (High-Medium-Low): ").capitalize()
+               if priority not in pri_order:
+                  print("Enter a valid priority order (High-Medium-Low): ")
+               else:
+                  break
+            clear_terminal()
+         case "5":
+            clear_terminal()
+            return "Task not added."
+         case "6":
+            clear_terminal()
+            count = 0
+            for i in [name,course,deadline,priority]:
+               count += 1
+               if (not i):
+                  match count:
+                     case 1:
+                        all_fields_added = False
+                        print("Missing name")
+                     case 2:
+                        all_fields_added = False
+                        print("Missing course")
+                     case 3:
+                        all_fields_added = False
+                        print("Missing deadline")
+                     case 4:
+                        all_fields_added = False
+                        print("Missing priority")
+            if (all_fields_added):
+               task = {
+                   "name": name,
+                   "course": course,
+                   "deadline": deadline,
+                   "priority": priority,
+                   "completed": False
+                }  
+               tasks.append(task)
+               save_tasks(tasks)
+               clear_terminal()
+               return "Task added!"
 
 def view_task(tasks):
    for task in tasks:
       print(task["name"], " - ", task["course"], "- ", task["deadline"])
+   print("")
 
 def complete_task(tasks):
    name = input("Enter task name: ")
@@ -73,9 +127,11 @@ def overdue_task(tasks):
       days = (deadline - date.today()).days
       if days < 0:
          print("Overdue: ", task["name"], "- was due", -days, "days ago")
-         return
-
-   print("No tasks found!")
+         found = True
+   if (not found):
+      print("No overdue tasks found!\n")
+   else:
+      print("")
 
 def check_deadline(tasks):
    name = input("Enter task name: ")
@@ -88,7 +144,7 @@ def check_deadline(tasks):
          else: 
              print(task["name"], "- ", days, "days until deadline")
          return
-   print("Task not found")
+   print("Task not found!")
 
 def summary(tasks):
 
@@ -102,7 +158,7 @@ def summary(tasks):
    for task in tasks:
       if task["completed"]:
          done += 1
-   print("\n--- Summary ---")
+   print("--- Summary ---")
    print("Total:     ", total)
    print("Completed:     ", done)
    print("Pending:     ", total - done)
@@ -128,34 +184,51 @@ def completed_task(tasks):
       print("No tasks found!")
 
 while True:
-    print("\n1. Add tasks")
-    print("2. View tasks")
-    print("3. Remove tasks")
-    print("4. Mark as completed")
-    print("5. Check overdue tasks")
-    print("6. Show Summary")
-    print("7. Check completed tasks")
-    print("8. Check task deadline")
-    print("9. Quit")
-    choice = input("Enter a choice: ")
+   print("1. Add tasks")
+   print("2. View tasks")
+   print("3. Remove tasks")
+   print("4. Mark as completed")
+   print("5. Check overdue tasks")
+   print("6. Show Summary")
+   print("7. Check completed tasks")
+   print("8. Check task deadline")
+   print("9. Quit")
+   choice = input("Enter a choice: ")
 
-    if choice == "1":
-       add_task(tasks)
-    elif choice == "2":
-       view_task(tasks)
-    elif choice == "3":
-       delete_task(tasks)
-    elif choice == "4":
-       complete_task(tasks)
-    elif choice == "5":
-       overdue_task(tasks)
-    elif choice == "6":
-       summary(tasks)
-    elif choice == "7":
-       completed_task(tasks)
-    elif choice == "8":
-       check_deadline(tasks)
-    elif choice == "9":
-        break
-    else:
-        print("Invalid Option")
+   match choice:
+      case "1":
+         clear_terminal()
+         print(add_task(tasks))
+         print("")
+      case "2":
+         clear_terminal()
+         view_task(tasks)
+      case "3":
+         clear_terminal()
+         delete_task(tasks)
+         print("")
+      case "4":
+         clear_terminal()
+         complete_task(tasks)
+         print("")
+      case "5":
+         clear_terminal()
+         overdue_task(tasks)
+      case "6":
+         clear_terminal()
+         summary(tasks)
+         print("")
+      case "7":
+         clear_terminal()
+         completed_task(tasks)
+         print("")
+      case "8":
+         clear_terminal()
+         check_deadline(tasks)
+         print("")
+      case "9":
+         clear_terminal()
+         break
+      case _:
+         clear_terminal()
+         print("Invalid Option")
